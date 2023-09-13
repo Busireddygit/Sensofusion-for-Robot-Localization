@@ -1,5 +1,4 @@
-# sensor_fusion-for-mobile-robots-using-robot_localization-
-# Robot Localization with IMU (BNO055) and GPS RTK using ROS
+# Outdoor Mobile Robot Localization with IMU (BNO055) and GPS RTK using ROS
 
 ## Introduction
 

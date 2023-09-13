@@ -1,0 +1,16 @@
+<launch>
+
+
+  
+  <!-- Load parameters navsat_transform nodes -->
+  <rosparam command="load" file="$(find ublox_utils)/params/navsat_transform.yaml" />
+  <node pkg="robot_localization" type="navsat_transform_node" name="navsat_transform" clear_params="true">
+    <!--remap from="gps/fix" to="ublox_position_receiver/fix"-->
+    <remap from="gps/fix" to="ublox_position_receiver/fix"/>
+    <!--remap from="imu/data" to="imu/data" -->
+    <remap from="imu/data" to="imu/data"/>
+    <remap from="odometry/filtered" to="odometry/filtered_map"/>
+  </node>
+  
+</launch>
+

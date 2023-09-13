@@ -1,0 +1,50 @@
+
+<launch>
+  <param name="use_sim_time" value="true"/>
+
+  <!-- Load parameters for dual EKF + navsat_transform nodes -->
+  <rosparam command="load" file="$(find ublox_utils)/params/dual_ekf_navsat_example.yaml" />
+  <node pkg="tf2_ros" type="static_transform_publisher" name="link2_broadcaster" output="screen" args="0.5 0 0.1 0 0 0 1 base_link gps">
+        <param name="use_sim_time" value="true" />
+        <param name="publish_frequency" value="30.0" />
+  </node>
+  <node pkg="tf2_ros" type="static_transform_publisher" name="link1_broadcaster" output="screen" args="0.2 0 0.1 0 0 0 1 base_link imu_link">
+        <param name="use_sim_time" value="true" />
+        <param name="publish_frequency" value="30.0" />
+    </node>
+  <!-- <node pkg="odom" name="gps_to_navsatfix" type="gps_to_navsatfix.py" output="screen"/> -->
+  <!-- <node name="baselink_transform_node" pkg="odom" type="baselinkTransform" output="screen"/> -->
+
+  <!--<node pkg="odom" name="split_odom_data" type="split_odom_data.py" output="screen"/> -->
+
+  <node name="plotjuggler_node" pkg="plotjuggler" type="plotjuggler" output="screen"/>
+
+  <!-- Launch local EKF node (Odom frame) -->
+  <node pkg="robot_localization" type="ekf_localization_node" name="ekf_local"
+        clear_params="true" output="screen">
+    <remap from="odometry/filtered" to="odometry/filtered_odom"/>
+  </node>
+
+  <!-- Launch Global EKF node (Map frame) -->
+  <node pkg="robot_localization" type="ekf_localization_node" name="ekf_global"
+        clear_params="true" output="screen">
+    <remap from="odometry/filtered" to="odometry/filtered_map"/>
+    <rosparam param="initial_state">[0, 0.0,  0.0,
+                                 0.0,  0.0,  0.0,
+                                 0.0,  0.0,  0.0,
+                                 0.0,  0.0,  0.0,
+                                 0.0,  0.0,  0.0]</rosparam>
+  </node>
+   
+  <!-- Launch Navsat_transform node -->
+  <node pkg="robot_localization" type="navsat_transform_node" name="navsat_transform" clear_params="true">
+    <remap from="gps/fix" to="ublox_position_receiver/fix"/>
+    <!-- <remap from="gps/fix" to="gps/navsatfix"/> -->
+    <remap from="imu/data" to="imu/data"/>
+    <remap from="odometry/filtered" to="odometry/filtered_map"/>
+  </node>
+
+  <node pkg="rosbag" name="rosbag" type="play" args="/home/ha/bagfiles/aug_16/odom.bag --clock -d .4 " />
+  
+
+</launch>
